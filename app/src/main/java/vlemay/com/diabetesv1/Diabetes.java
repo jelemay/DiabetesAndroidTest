@@ -31,7 +31,7 @@ public class Diabetes extends Activity {
         }
         listAllIntent = new Intent(this,DiabetesList.class);
         listDeviceIntent = new Intent(this,DiabetesDeviceList.class);
-        listUserIntent = new Intent(this,DiabetesUserList.class);
+
         deleteByIdIntent = new Intent(this,DiabetesDeleteEvent.class);
         addEventIntent = new Intent(this,DiabetesAddEvent.class);
 
@@ -69,6 +69,7 @@ public class Diabetes extends Activity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_diabetes, container, false);
+
             // about button and its listener
             Button listAllButton = (Button) rootView
                     .findViewById(R.id.list_button);
@@ -84,19 +85,7 @@ public class Diabetes extends Activity {
                 }
             });
 
-            Button listUserButton = (Button) rootView
-                    .findViewById(R.id.list_user_events_button);
-            listUserButton.setOnClickListener(new View.OnClickListener() {
 
-                @Override
-                public void onClick(View v) {
-                    // TODO Auto-generated method stub
-                    Log.i("jl", "clicked the User list button");
-                    listUserIntent.putExtra("listType","user");
-                    startActivity(listUserIntent);
-
-                }
-            });
 
             Button listDeviceButton = (Button) rootView
                     .findViewById(R.id.list_device_events_button);
@@ -106,7 +95,7 @@ public class Diabetes extends Activity {
                 public void onClick(View v) {
                     // TODO Auto-generated method stub
                     Log.i("jl", "clicked the Device list button");
-                    listDeviceIntent.putExtra("listType","user");
+                    listDeviceIntent.putExtra("listType","device");
                     startActivity(listDeviceIntent);
 
                 }

@@ -25,10 +25,17 @@ import java.util.List;
 
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
+import vlemay.com.diabetesv1.client.PatientSvcApi;
+import vlemay.com.diabetesv1.model.GlucoseEventData;
+import vlemay.com.diabetesv1.service.PatientSvc;
 
 /**
  * Created by lemay on 10/23/14.
  */
+
+// this class to be removed
+
+    // not used in current app
 public class UserGlucoseListFragment extends Fragment{
 
     static TextView list_header_Text_Box;
@@ -79,7 +86,7 @@ public class UserGlucoseListFragment extends Fragment{
     }
 
 
-    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEvent>> {
+    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEventData>> {
 
 
         @Override
@@ -95,7 +102,7 @@ public class UserGlucoseListFragment extends Fragment{
         }
 
         @Override
-        protected List<GlucoseEvent> doInBackground(Integer... resId) {
+        protected List<GlucoseEventData> doInBackground(Integer... resId) {
             Log.i("jl", "Executing the async task");
             Log.i("jl", "Operation ID as seen in Async Task");
             Log.i("jl", myOperation);
@@ -125,6 +132,8 @@ public class UserGlucoseListFragment extends Fragment{
 
             Gson gson = builder.create();
 
+            PatientSvcApi patientSvc = PatientSvc.getOrShowLogin(myContext);
+
             DiabetesSvcApi diabetesSVC= new RestAdapter.Builder()
                     .setEndpoint(TEST_URL)
                     .setConverter(new GsonConverter(gson))
@@ -133,7 +142,7 @@ public class UserGlucoseListFragment extends Fragment{
                     .create(DiabetesSvcApi.class);
 
 
-            List<GlucoseEvent> gList = diabetesSVC.getGlucoseEventListByUserId(myUserIdL);
+            List<GlucoseEventData> gList = patientSvc.getGlucoseEventList();
 
             return gList;
         }
@@ -146,7 +155,7 @@ public class UserGlucoseListFragment extends Fragment{
         }
 
         @Override
-        protected void onPostExecute(List<GlucoseEvent> result) {
+        protected void onPostExecute(List<GlucoseEventData> result) {
             int listSize=result.size();
             list_header_Text_Box.setText("Got the List Data from the Network");
             size_of_list_Text_Box.setText(String.valueOf(listSize));
@@ -154,7 +163,7 @@ public class UserGlucoseListFragment extends Fragment{
 
             ArrayList<String> glucoseEventList = new ArrayList<String>();
 
-            for (GlucoseEvent ev : result) {
+            for (GlucoseEventData ev : result) {
                 String event = " ";
                 long id = ev.getId();
                 Date creationDate = ev.getCreationDate();
@@ -162,15 +171,15 @@ public class UserGlucoseListFragment extends Fragment{
                 Boolean isBeforeMeal = ev.getIsBeforeMeal();
                 Boolean isAfterMeal = ev.getIsAfterMeal();
                 Long deviceID = ev.getDeviceId();
-                Long userId = ev.getUserId();
+
                 event = event +
                         "   Event Id =  " + Long.toString(id)+
                         "   Creation Date=  " + creationDate.toString()+
                         "   Concentration =   " + Double.toString(concentration) +
                         "   Is Before Meal=   " + Boolean.toString(isBeforeMeal) +
                         "   Is After Meal=   " + Boolean.toString(isAfterMeal) +
-                        "   Device Id =   " + Long.toString(deviceID) +
-                        "   Use Id =   " + Long.toString(userId);
+                        "   Device Id =   " + Long.toString(deviceID)
+                       ;
                 glucoseEventList.add(event);
 
             }

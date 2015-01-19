@@ -8,6 +8,8 @@ import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.PUT;
 import retrofit.http.Path;
+import vlemay.com.diabetesv1.model.GlucoseEvent;
+import vlemay.com.diabetesv1.model.GlucoseEventRequest;
 
 /**
  * Created by lemay on 10/15/14.

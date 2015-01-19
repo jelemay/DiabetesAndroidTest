@@ -3,6 +3,7 @@ package vlemay.com.diabetesv1;
 /**
  * Created by lemay on 10/26/14.
  */
+
 import android.app.Fragment;
 import android.content.Context;
 import android.os.AsyncTask;
@@ -15,19 +16,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import vlemay.com.diabetesv1.client.PatientSvcApi;
+import vlemay.com.diabetesv1.model.GlucoseEventData;
+import vlemay.com.diabetesv1.service.PatientSvc;
 
 /**
  * Created by lemay on 10/23/14.
@@ -82,7 +77,7 @@ public class DeviceGlucoseListFragment extends Fragment{
     }
 
 
-    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEvent>> {
+    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEventData>> {
 
 
         @Override
@@ -98,45 +93,19 @@ public class DeviceGlucoseListFragment extends Fragment{
         }
 
         @Override
-        protected List<GlucoseEvent> doInBackground(Integer... resId) {
+        protected List<GlucoseEventData> doInBackground(Integer... resId) {
             Log.i("jl", "Executing the async task");
             Log.i("jl", "Operation ID as seen in Async Task");
             Log.i("jl", myOperation);
             Log.i("jl", "User ID as seen in Async Task");
             Log.i("jl", myDeviceId);
 
-            String TEST_URL = "http://vlemay.com:8080/diabetes-0.2.0";
-
-            GsonBuilder builder = new GsonBuilder();
-
-            builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                @Override
-                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                {
-                    String date = json.getAsJsonPrimitive().getAsString();
-                    long dateL = Long.valueOf(date);
-
-                    Log.i("jl", "Date long to string");
-                    Log.i("jl", String.valueOf(dateL));
-
-                    Date dateReturn = new Date(dateL);
-
-                    return dateReturn;
-                }
-            });
-            //  .registerTypeAdapter(Date.class, new DateTypeAdapter())
-
-            Gson gson = builder.create();
-
-            DiabetesSvcApi diabetesSVC= new RestAdapter.Builder()
-                    .setEndpoint(TEST_URL)
-                    .setConverter(new GsonConverter(gson))
-                    .setLogLevel(RestAdapter.LogLevel.FULL)
-                    .build()
-                    .create(DiabetesSvcApi.class);
+            PatientSvcApi patientSVC = PatientSvc.getOrShowLogin(myContext);
 
 
-            List<GlucoseEvent> gList = diabetesSVC.getGlucoseEventListByDeviceId(myDeviceIdL);
+
+
+            List<GlucoseEventData> gList = patientSVC.getGlucoseEventListByDeviceId(myDeviceIdL);
 
             return gList;
         }
@@ -149,7 +118,7 @@ public class DeviceGlucoseListFragment extends Fragment{
         }
 
         @Override
-        protected void onPostExecute(List<GlucoseEvent> result) {
+        protected void onPostExecute(List<GlucoseEventData> result) {
             int listSize=result.size();
             list_header_Text_Box.setText("Got the List Data from the Network");
             size_of_list_Text_Box.setText(String.valueOf(listSize));
@@ -157,23 +126,24 @@ public class DeviceGlucoseListFragment extends Fragment{
 
             ArrayList<String> glucoseEventList = new ArrayList<String>();
 
-            for (GlucoseEvent ev : result) {
+            for (GlucoseEventData ev : result) {
                 String event = " ";
                 long id = ev.getId();
                 Date creationDate = ev.getCreationDate();
                 Double concentration = ev.getConcentration();
                 Boolean isBeforeMeal = ev.getIsBeforeMeal();
+                if(isBeforeMeal == null) isBeforeMeal=true;
                 Boolean isAfterMeal = ev.getIsAfterMeal();
+                if(isAfterMeal == null) isAfterMeal=true;
                 Long deviceID = ev.getDeviceId();
-                Long userId = ev.getUserId();
+
                 event = event +
                         "   Event Id =  " + Long.toString(id)+
                         "   Creation Date=  " + creationDate.toString()+
                         "   Concentration =   " + Double.toString(concentration) +
                         "   Is Before Meal=   " + Boolean.toString(isBeforeMeal) +
                         "   Is After Meal=   " + Boolean.toString(isAfterMeal) +
-                        "   Device Id =   " + Long.toString(deviceID) +
-                        "   Use Id =   " + Long.toString(userId);
+                        "   Device Id =   " + Long.toString(deviceID) ;
                 glucoseEventList.add(event);
 
             }

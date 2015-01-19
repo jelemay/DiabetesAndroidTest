@@ -12,19 +12,13 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import vlemay.com.diabetesv1.client.PatientSvcApi;
+import vlemay.com.diabetesv1.model.GlucoseEventData;
+import vlemay.com.diabetesv1.service.PatientSvc;
 
 /**
  * Created by lemay on 10/22/14.
@@ -75,7 +69,7 @@ public class GeneralGlucoseListFragment extends Fragment {
     }
 
 
-    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEvent>> {
+    class LoadListTask extends AsyncTask<Integer, Integer, List<GlucoseEventData>> {
 
 
         @Override
@@ -91,42 +85,16 @@ public class GeneralGlucoseListFragment extends Fragment {
         }
 
         @Override
-        protected List<GlucoseEvent> doInBackground(Integer... resId) {
+        protected List<GlucoseEventData> doInBackground(Integer... resId) {
             Log.i("jl", "Executing the async task");
             Log.i("jl", "Operation ID as seen in Async Task");
             Log.i("jl", myOperation);
 
-            String TEST_URL = "http://vlemay.com:8080/diabetes-0.2.0";
 
-            GsonBuilder builder = new GsonBuilder();
 
-            builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                @Override
-                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                     {
-                    String date = json.getAsJsonPrimitive().getAsString();
-                    long dateL = Long.valueOf(date);
+            PatientSvcApi patientSvc = PatientSvc.getOrShowLogin(DiabetesList.myContext);
 
-                    Log.i("jl", "Date long to string");
-                    Log.i("jl", String.valueOf(dateL));
-
-                    Date dateReturn = new Date(dateL);
-
-                     return dateReturn;
-                    }
-            });
-                    //  .registerTypeAdapter(Date.class, new DateTypeAdapter())
-
-            Gson gson = builder.create();
-
-            DiabetesSvcApi diabetesSVC= new RestAdapter.Builder()
-                    .setEndpoint(TEST_URL)
-                   .setConverter(new GsonConverter(gson))
-                    .setLogLevel(RestAdapter.LogLevel.FULL)
-                    .build()
-                    .create(DiabetesSvcApi.class);
-
-             List<GlucoseEvent> gList = diabetesSVC.getGlucoseList();
+            List<GlucoseEventData> gList = patientSvc.getGlucoseEventList();
 
             String length = String.valueOf(gList.size());
             Log.i("jl", length);
@@ -142,43 +110,67 @@ public class GeneralGlucoseListFragment extends Fragment {
         }
 
         @Override
-        protected void onPostExecute(List<GlucoseEvent> result) {
+        protected void onPostExecute(List<GlucoseEventData> result) {
             int listSize=result.size();
             list_header_Text_Box.setText("Got the List Data from the Network");
             size_of_list_Text_Box.setText(String.valueOf(listSize));
             Log.i("jl", "Finished the task");
 
+            Log.i("jl", "the result object is is");
+
+            Log.i("jl",result.toString());
+
+
             ArrayList<String> glucoseEventList = new ArrayList<String>();
 
-            for (GlucoseEvent ev : result) {
+            for (GlucoseEventData ev : result) {
                 String event = " ";
                 long id = ev.getId();
+                Log.i("jl", "got id");
                 Date creationDate = ev.getCreationDate();
+                Log.i("jl", "got creation date");
                 Double concentration = ev.getConcentration();
+                Log.i("jl", "got concentration");
                 Boolean isBeforeMeal = ev.getIsBeforeMeal();
+                if(isBeforeMeal==null) isBeforeMeal= false;
+                Log.i("jl", "got is before meal");
                 Boolean isAfterMeal = ev.getIsAfterMeal();
+                Log.i("jl", "got is after meal");
                 Long deviceID = ev.getDeviceId();
-                Long userId = ev.getUserId();
+                Log.i("jl", "got device id");
+
                 event = event +
                         "   Event Id =  " + Long.toString(id)+
                         "   Creation Date=  " + creationDate.toString()+
-                        "   Concentration =   " + Double.toString(concentration) +
-                        "   Is Before Meal=   " + Boolean.toString(isBeforeMeal) +
+                       "   Concentration =   " + Double.toString(concentration)+
+                        "   Is Before Meal=   " + Boolean.toString(isBeforeMeal)+
                         "   Is After Meal=   " + Boolean.toString(isAfterMeal) +
-                        "   Device Id =   " + Long.toString(deviceID) +
-                        "   Use Id =   " + Long.toString(userId);
+                       "   Device Id =   " + Long.toString(deviceID)
+                      ;
+
+
+                Log.i("jl", "an event  is");
+                Log.i("jl", event);
+
                 glucoseEventList.add(event);
+                Log.i("jl", "an event was added to the ArrayList");
+                Log.i("jl", glucoseEventList.toString());
 
             }
+            Log.i("jl", "the glucoseEventList object and size");
+            Log.i("jl", glucoseEventList.toString());
+            Log.i("jl", String.valueOf(glucoseEventList.size()));
 
-
+            Log.i("jl", "About to define array adapter");
 
             ArrayAdapter<String> arrayAdapter =
                    // new ArrayAdapter<String>(myContext, android.R.layout.simple_list_item_1, glucoseEventList);
                     new ArrayAdapter<String>(myContext, android.R.layout.simple_list_item_1, glucoseEventList);
-
+            Log.i("jl", "the arrayAdapter object");
+            Log.i("jl", arrayAdapter.toString());
             // Set The Adapter
             glucose_list_ListView.setAdapter(arrayAdapter);
+            Log.i("jl", "set the arrayAdapter in the UI");
 
 
         }

@@ -12,5 +12,6 @@
     <string name="title_activity_diabetes_list_devices">DiabetesListDevices</string>
     <string name="title_activity_diabetes_delete_event">DiabetesDeleteEvent</string>
     <string name="title_activity_diabetes_add_event">DiabetesAddEvent</string>
+    <string name="title_activity_login_screen">LoginScreenActivity</string>
 
 </resources>

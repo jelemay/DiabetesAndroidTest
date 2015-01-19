@@ -20,19 +20,11 @@
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="List Events for User"
-        android:id="@+id/list_user_events_button"
-        android:layout_below="@+id/list_button"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
         android:text="List Events for Device"
         android:id="@+id/list_device_events_button"
         android:singleLine="true"
-        android:layout_below="@+id/list_user_events_button"
-        android:layout_centerHorizontal="true" />
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/list_button" />
 
     <Button
         android:layout_width="wrap_content"

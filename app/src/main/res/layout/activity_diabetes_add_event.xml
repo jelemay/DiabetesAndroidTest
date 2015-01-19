@@ -67,17 +67,6 @@
         android:singleLine="true"
         android:layout_marginBottom="20dp" />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="user Id"
-        android:id="@+id/userIdLabel"
-        android:layout_below="@+id/deviceIdLabel"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="20dp" />
-
     <Button
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -128,15 +117,5 @@
         android:layout_alignEnd="@id/concentrationLabel"
         android:layout_alignParentEnd="false"
         android:layout_alignParentStart="false" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="number"
-        android:ems="10"
-        android:id="@+id/userIdValue"
-        android:layout_alignTop="@+id/userIdLabel"
-        android:layout_alignRight="@+id/deviceIdValue"
-        android:layout_alignEnd="@+id/deviceIdValue" />
 
 </RelativeLayout>

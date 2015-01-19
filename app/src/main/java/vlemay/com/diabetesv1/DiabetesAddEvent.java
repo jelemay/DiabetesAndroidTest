@@ -13,17 +13,10 @@ import android.widget.EditText;
 import android.widget.RadioButton;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-
-import java.lang.reflect.Type;
-import java.util.Date;
-
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import vlemay.com.diabetesv1.client.PatientSvcApi;
+import vlemay.com.diabetesv1.model.GlucoseEventData;
+import vlemay.com.diabetesv1.model.GlucoseEventRequest;
+import vlemay.com.diabetesv1.service.PatientSvc;
 
 
 public class DiabetesAddEvent extends Activity {
@@ -36,7 +29,7 @@ public class DiabetesAddEvent extends Activity {
         setContentView(R.layout.activity_diabetes_add_event);
         final EditText concentrationValue = (EditText) findViewById(R.id.concentrationValue);
         final EditText deviceIdValue = (EditText) findViewById(R.id.deviceIdValue);
-        final EditText userIdValue = (EditText) findViewById(R.id.userIdValue);
+
         final RadioButton isBeforeMealValue = (RadioButton) findViewById(R.id.isBeforeMealValue);
         final RadioButton isAfterMealValue = (RadioButton) findViewById(R.id.isAfterMealValue);
 
@@ -45,16 +38,14 @@ public class DiabetesAddEvent extends Activity {
 
         glucoseEventAddButton.setOnClickListener(new View.OnClickListener() {
 
-
-
             @Override
             public void onClick(View v) {
 
                 Log.i("jl", "clicked the glucose event add  button");
 
                 if (concentrationValue.getText().toString().equals("") ||
-                        deviceIdValue.getText().toString().equals("") ||
-                        userIdValue.getText().toString().equals("")) {
+                        deviceIdValue.getText().toString().equals("") )
+                      {
 
                     Toast.makeText(myContext, "All inputs are required",
                             Toast.LENGTH_LONG).show();
@@ -63,7 +54,7 @@ public class DiabetesAddEvent extends Activity {
                 else
                 {
                     double concentration = Double.valueOf(concentrationValue.getText().toString());
-                    Long userId = Long.valueOf(userIdValue.getText().toString());
+
                     Long deviceId = Long.valueOf(deviceIdValue.getText().toString());
                     Boolean isBeforeMeal = isBeforeMealValue.isChecked();
                     Boolean isAfterMeal = isAfterMealValue.isChecked();
@@ -73,11 +64,10 @@ public class DiabetesAddEvent extends Activity {
                     request.setIsBeforeMeal(isBeforeMeal);
                     request.setIsAfterMeal(isAfterMeal);
                     request.setDeviceId(deviceId);
-                    request.setUserId(userId);
+
 
                     Log.i("jl", "request instance data");
                     Log.i("jl", Double.toString(request.getConcentration()));
-                    Log.i("jl", Long.toString(request.getUserId()));
                     Log.i("jl", Long.toString(request.getDeviceId()));
                     Log.i("jl", Boolean.toString(isBeforeMeal));
                     Log.i("jl", Boolean.toString(isAfterMeal));
@@ -116,7 +106,7 @@ public class DiabetesAddEvent extends Activity {
     }
 
 
-    public class AddEventTask extends AsyncTask<Integer, Integer, GlucoseEvent> {
+    public class AddEventTask extends AsyncTask<Integer, Integer, GlucoseEventData> {
 
 
         @Override
@@ -126,41 +116,15 @@ public class DiabetesAddEvent extends Activity {
         }
 
         @Override
-        protected GlucoseEvent doInBackground(Integer... resId) {
+        protected GlucoseEventData doInBackground(Integer... resId) {
             Log.i("jl", "Executing the async task");
 
 
-            String TEST_URL = "http://vlemay.com:8080/diabetes-0.2.0";
+            PatientSvcApi patientSVC = PatientSvc.getOrShowLogin(DiabetesAddEvent.this.getApplicationContext());
 
-            GsonBuilder builder = new GsonBuilder();
-
-            builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                @Override
-                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-                    String date = json.getAsJsonPrimitive().getAsString();
-                    long dateL = Long.valueOf(date);
-
-                    Log.i("jl", "Date long to string");
-                    Log.i("jl", String.valueOf(dateL));
-
-                    Date dateReturn = new Date(dateL);
-
-                    return dateReturn;
-                }
-            });
-            //  .registerTypeAdapter(Date.class, new DateTypeAdapter())
-
-            Gson gson = builder.create();
-
-            DiabetesSvcApi diabetesSVC = new RestAdapter.Builder()
-                    .setEndpoint(TEST_URL)
-                    .setConverter(new GsonConverter(gson))
-                    .setLogLevel(RestAdapter.LogLevel.FULL)
-                    .build()
-                    .create(DiabetesSvcApi.class);
 
             Log.i("jl", "Sending the Put");
-            GlucoseEvent ev = diabetesSVC.addGlucoseEvent(request);
+            GlucoseEventData ev = patientSVC.addGlucoseEvent(request);
             Log.i("jl", "Received the results from the put");
 
             return ev;
@@ -175,7 +139,7 @@ public class DiabetesAddEvent extends Activity {
         }
 
         @Override
-        protected void onPostExecute(GlucoseEvent result) {
+        protected void onPostExecute(GlucoseEventData result) {
             Context myContext = DiabetesAddEvent.this.getApplicationContext();
             Toast.makeText(myContext, "The event was added",
                     Toast.LENGTH_LONG).show();

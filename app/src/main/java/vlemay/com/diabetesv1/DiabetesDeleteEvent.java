@@ -15,19 +15,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
-import com.google.gson.JsonElement;
-
-import java.lang.reflect.Type;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-
-import retrofit.RestAdapter;
-import retrofit.converter.GsonConverter;
+import vlemay.com.diabetesv1.client.PatientSvcApi;
+import vlemay.com.diabetesv1.service.PatientSvc;
 
 
 public class DiabetesDeleteEvent extends Activity {
@@ -144,59 +133,11 @@ public class DiabetesDeleteEvent extends Activity {
             Log.i("jl", "Operation ID as seen in Async Task");
             Log.i("jl", myOperation);
 
-            String TEST_URL = "http://vlemay.com:8080/diabetes-0.2.0";
+            PatientSvcApi patientSVC = PatientSvc.getOrShowLogin(myContext);
+;
+            boolean isEventDeleted = patientSVC.deleteGlucoseEvent(glucoseIdL);
 
-            GsonBuilder builder = new GsonBuilder();
-
-            builder.registerTypeAdapter(Date.class, new JsonDeserializer<Date>() {
-                @Override
-                public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) {
-                    String date = json.getAsJsonPrimitive().getAsString();
-                    long dateL = Long.valueOf(date);
-
-                    Log.i("jl", "Date long to string");
-                    Log.i("jl", String.valueOf(dateL));
-
-                    Date dateReturn = new Date(dateL);
-
-                    return dateReturn;
-                }
-            });
-            //  .registerTypeAdapter(Date.class, new DateTypeAdapter())
-
-            Gson gson = builder.create();
-
-            DiabetesSvcApi diabetesSVC = new RestAdapter.Builder()
-                    .setEndpoint(TEST_URL)
-                    .setConverter(new GsonConverter(gson))
-                    .setLogLevel(RestAdapter.LogLevel.FULL)
-                    .build()
-                    .create(DiabetesSvcApi.class);
-
-            //public boolean deleteGlucoseEvent(@Path("glucoseID") long glucoseId);
-            List<GlucoseEvent> gList = diabetesSVC.getGlucoseList();
-
-            Iterator<GlucoseEvent> gIt = gList.iterator();
-            GlucoseEvent temp;
-            boolean exists = false;
-            boolean isDeleted;
-            while(gIt.hasNext()){
-                temp=gIt.next();
-                if(temp.getId() == glucoseIdL){
-                    exists=true;
-                }
-            }
-            if(exists){
-                 isDeleted = diabetesSVC.deleteGlucoseEvent(glucoseIdL);
-            }
-            else{
-                isDeleted =false;
-            }
-
-
-
-
-            return isDeleted;
+            return isEventDeleted;
         }
 
         @Override
